@@ -354,7 +354,7 @@ async def extract(
             user_agent=ua,
             viewport={"width": 1280, "height": 1600},
         )
-        await context.add_cookies([c.__dict__ for c in cookies])  # ty: ignore[invalid-argument-type]
+        await context.add_cookies([c.__dict__ for c in cookies])
         page = await context.new_page()
 
         await page.goto(url, wait_until="domcontentloaded", timeout=page_timeout_ms)

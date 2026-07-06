@@ -20,7 +20,10 @@ lint:
 check:
 	uv run ruff format --check .
 	uv run ruff check .
-	uv run ty check
+	# Skip twscrape/articles/extractor.py from ty because it imports playwright
+	# (an [article] extra dep, not installed by `uv sync` in CI). The extractor's
+	# behavior is covered by the integration smoke test in tests/articles/.
+	uv run ty check --exclude twscrape/articles/extractor.py
 
 test:
 	@uv run pytest -s --cov=twscrape tests/
