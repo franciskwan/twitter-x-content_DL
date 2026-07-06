@@ -180,9 +180,13 @@ async def _handle_article(args) -> None:
     out_path.write_text(body)
     print(f"title:    {article.title}")
     if article.author:
-        print(f"author:   {article.author.display_name or ''} @{article.author.username or ''}".rstrip())
+        print(
+            f"author:   {article.author.display_name or ''} @{article.author.username or ''}".rstrip()
+        )
     print(f"url:      {article.url}")
-    print(f"blocks:   {len(article.blocks)}  (images: {article.image_count}, videos: {article.video_count})")
+    print(
+        f"blocks:   {len(article.blocks)}  (images: {article.image_count}, videos: {article.video_count})"
+    )
     print(f"words:    {article.word_count}")
     print(f"format:   {fmt}")
     print(f"wrote {len(body):,} chars -> {out_path}")
@@ -289,19 +293,25 @@ def run():
     article_p = subparsers.add_parser(
         "article",
         help="Extract an X article to HTML or Markdown (requires `pip install "
-             "twitter-x-content_DL[article]`)",
+        "twitter-x-content_DL[article]`)",
     )
     article_p.add_argument("article_url", help="Article URL (article/, status/, or i/article/)")
     article_p.add_argument(
-        "--account", dest="article_account", default="my_account",
+        "--account",
+        dest="article_account",
+        default="my_account",
         help="Which account row in --db to use for cookies (default: my_account)",
     )
     article_p.add_argument(
-        "--out", dest="article_out", default=None,
+        "--out",
+        dest="article_out",
+        default=None,
         help="Output directory (default: current dir)",
     )
     article_p.add_argument(
-        "--md", dest="article_md", action="store_true",
+        "--md",
+        dest="article_md",
+        action="store_true",
         help="Emit Markdown instead of the default HTML",
     )
 

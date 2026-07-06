@@ -81,6 +81,10 @@ ignore = ["E501", "UP035", "SIM105"]
 [tool.ty.environment]
 python-version = "3.10"
 python-platform = "all"
+# Make `tests` importable as a package so relative imports in tests/conftest.py
+# (e.g. `from .mock_http import MockClient`) resolve under ty. Same idea as
+# pytest's `pythonpath = ["."]` already in [tool.pytest.ini_options] below.
+extra-paths = ["."]
 
 [tool.ty.terminal]
 error-on-warning = true

@@ -161,13 +161,12 @@ def render_html(article: Article) -> str:
         else:
             out.append(
                 f'<p class="byline">{_html_escape(author_label)} '
-                f'{_html_escape(author_handle)} — '
+                f"{_html_escape(author_handle)} — "
                 f'<a href="{_html_escape(url)}">Source on X</a></p>'
             )
     else:
         out.append(
-            f'<p class="byline">Source: <a href="{_html_escape(url)}">'
-            f"{_html_escape(url)}</a></p>"
+            f'<p class="byline">Source: <a href="{_html_escape(url)}">{_html_escape(url)}</a></p>'
         )
 
     out.append("<hr>")
@@ -214,13 +213,9 @@ def _emit_html_block(out: list[str], block: ArticleBlock) -> None:
             return
         poster = _html_escape(block.video_card.poster_url)
         tweet_url = _html_escape(block.video_card.tweet_url or "")
-        out.append(
-            f'<a class="video-card" href="{tweet_url}" target="_blank" rel="noopener">'
-        )
+        out.append(f'<a class="video-card" href="{tweet_url}" target="_blank" rel="noopener">')
         if poster:
-            out.append(
-                f'<img class="poster" src="{poster}" alt="video poster" loading="lazy">'
-            )
+            out.append(f'<img class="poster" src="{poster}" alt="video poster" loading="lazy">')
         else:
             out.append('<div class="poster" style="aspect-ratio:16/9;background:#000;"></div>')
         out.append('<div class="label">▶ Watch video on X (opens in new tab)</div>')
@@ -252,9 +247,7 @@ def render_markdown(article: Article) -> str:
         author = article.author
         author_label = author.display_name or author.username or ""
         author_handle = f"@{author.username}" if author.username else ""
-        out.append(
-            f"> **{author_label}** {author_handle} — [Source on X]({url})"
-        )
+        out.append(f"> **{author_label}** {author_handle} — [Source on X]({url})")
         out.append("")
     else:
         out.append(f"> Source: {url}")

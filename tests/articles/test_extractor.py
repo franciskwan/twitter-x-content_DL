@@ -42,11 +42,13 @@ def cookies():
         pytest.skip(f"could not read {ACCOUNTS_DB}: {e}")
 
     import json as _json
+
     parsed = _json.loads(row[0])
     if "auth_token" not in parsed or "ct0" not in parsed:
         pytest.skip("auth_token / ct0 missing — login again first")
 
     from twscrape.articles import cookies_from_dict
+
     return cookies_from_dict(parsed)
 
 
@@ -54,6 +56,7 @@ def cookies():
 async def test_extract_real_article(cookies):
     """End-to-end against a live X article. ~10s wall-clock."""
     from twscrape.articles import extract
+
     article = await extract(TEST_URL, cookies, settle_ms=2000)
     assert article.title == "普通人如何成为一名量化交易员：一条被讲透的路径"
     assert article.url.startswith("https://x.com/KKaWSB/article/")
@@ -66,8 +69,10 @@ async def test_extract_real_article(cookies):
 async def test_extract_returns_blocks_in_order(cookies):
     """The first block after the title should be either an image or a paragraph."""
     from twscrape.articles import BLOCK_HEADING, BLOCK_IMAGE, BLOCK_PARAGRAPH, extract
+
     article = await extract(TEST_URL, cookies, settle_ms=2000)
     assert len(article.blocks) > 0
     first_kind = article.blocks[0].kind
-    assert first_kind in (BLOCK_IMAGE, BLOCK_PARAGRAPH, BLOCK_HEADING), \
+    assert first_kind in (BLOCK_IMAGE, BLOCK_PARAGRAPH, BLOCK_HEADING), (
         f"unexpected first block kind: {first_kind}"
+    )

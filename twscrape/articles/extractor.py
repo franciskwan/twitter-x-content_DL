@@ -62,10 +62,7 @@ class Cookie(JSONTrait):
 
 def cookies_from_dict(d: dict, domain: str = ".x.com") -> list[Cookie]:
     """Convert a `{name: value}` dict into a list of `Cookie` objects."""
-    return [
-        Cookie(name=n, value=v, domain=domain)
-        for n, v in d.items()
-    ]
+    return [Cookie(name=n, value=v, domain=domain) for n, v in d.items()]
 
 
 def cookies_from_twscrape_db(db_path: str, account: str = "my_account") -> list[Cookie]:
@@ -76,9 +73,7 @@ def cookies_from_twscrape_db(db_path: str, account: str = "my_account") -> list[
     that uses the same shape — see `cookies_from_dict`.
     """
     db = sqlite3.connect(db_path)
-    row = db.execute(
-        "SELECT cookies FROM accounts WHERE username = ?", (account,)
-    ).fetchone()
+    row = db.execute("SELECT cookies FROM accounts WHERE username = ?", (account,)).fetchone()
     if not row:
         raise RuntimeError(f"no account {account!r} in {db_path}")
     return cookies_from_dict(json.loads(row[0]))
@@ -341,7 +336,7 @@ async def extract(
     except ImportError as e:
         raise RuntimeError(
             "Playwright is required for article extraction. Install with:\n"
-            "  pip install \"twitter-x-content_DL[article]\"\n"
+            '  pip install "twitter-x-content_DL[article]"\n'
             "  python -m playwright install chromium"
         ) from e
 
@@ -359,7 +354,7 @@ async def extract(
             user_agent=ua,
             viewport={"width": 1280, "height": 1600},
         )
-        await context.add_cookies([c.__dict__ for c in cookies])
+        await context.add_cookies([c.__dict__ for c in cookies])  # ty: ignore[invalid-argument-type]
         page = await context.new_page()
 
         await page.goto(url, wait_until="domcontentloaded", timeout=page_timeout_ms)
@@ -388,11 +383,13 @@ def _result_to_article(raw: dict) -> Article:
         kind = b.get("kind")
         if kind == BLOCK_HEADING:
             text = b.get("text", "")
-            blocks.append(ArticleBlock(
-                kind=BLOCK_HEADING,
-                text=text,
-                level=int(b.get("level", 2)),
-            ))
+            blocks.append(
+                ArticleBlock(
+                    kind=BLOCK_HEADING,
+                    text=text,
+                    level=int(b.get("level", 2)),
+                )
+            )
             body_parts.append(text)
         elif kind == BLOCK_PARAGRAPH:
             text = b.get("text", "")
@@ -403,30 +400,36 @@ def _result_to_article(raw: dict) -> Article:
             blocks.append(ArticleBlock(kind=BLOCK_BLOCKQUOTE, text=text))
             body_parts.append(text)
         elif kind == BLOCK_IMAGE:
-            blocks.append(ArticleBlock(
-                kind=BLOCK_IMAGE,
-                image=ArticleImage(
-                    src=b.get("src", ""),
-                    alt=b.get("alt", ""),
-                    width=b.get("width") or None,
-                    height=b.get("height") or None,
-                ),
-            ))
+            blocks.append(
+                ArticleBlock(
+                    kind=BLOCK_IMAGE,
+                    image=ArticleImage(
+                        src=b.get("src", ""),
+                        alt=b.get("alt", ""),
+                        width=b.get("width") or None,
+                        height=b.get("height") or None,
+                    ),
+                )
+            )
         elif kind == BLOCK_VIDEO_CARD:
-            blocks.append(ArticleBlock(
-                kind=BLOCK_VIDEO_CARD,
-                video_card=ArticleVideoCard(
-                    tweet_url=b.get("tweet_url", ""),
-                    poster_url=b.get("poster", ""),
-                    src=b.get("src", ""),
-                ),
-            ))
+            blocks.append(
+                ArticleBlock(
+                    kind=BLOCK_VIDEO_CARD,
+                    video_card=ArticleVideoCard(
+                        tweet_url=b.get("tweet_url", ""),
+                        poster_url=b.get("poster", ""),
+                        src=b.get("src", ""),
+                    ),
+                )
+            )
         elif kind == BLOCK_LIST:
             items = b.get("items", [])
-            blocks.append(ArticleBlock(
-                kind=BLOCK_LIST,
-                list=ArticleList(items=items, ordered=bool(b.get("ordered", False))),
-            ))
+            blocks.append(
+                ArticleBlock(
+                    kind=BLOCK_LIST,
+                    list=ArticleList(items=items, ordered=bool(b.get("ordered", False))),
+                )
+            )
             body_parts.append(" / ".join(items))
 
     author_dict = raw.get("author") or {}

@@ -33,15 +33,18 @@ from twscrape.articles.renderers import _html_escape
 
 
 class TestSafeFilename:
-    @pytest.mark.parametrize("inp,expected", [
-        ("Hello World", "Hello World"),
-        ("How To Pull Psychological Levers", "How To Pull Psychological Levers"),
-        ('A/B test: "hello" / world? *', "A_B test_ _hello_ _ world"),
-        ("   ...  leading & trailing   ...   ", "leading & trailing"),
-        ("", "article"),
-        ("   ", "article"),
-        ("////", "article"),  # all-underscore result also falls back
-    ])
+    @pytest.mark.parametrize(
+        "inp,expected",
+        [
+            ("Hello World", "Hello World"),
+            ("How To Pull Psychological Levers", "How To Pull Psychological Levers"),
+            ('A/B test: "hello" / world? *', "A_B test_ _hello_ _ world"),
+            ("   ...  leading & trailing   ...   ", "leading & trailing"),
+            ("", "article"),
+            ("   ", "article"),
+            ("////", "article"),  # all-underscore result also falls back
+        ],
+    )
     def test_basic_replacements(self, inp, expected):
         assert safe_filename(inp) == expected
 
@@ -86,7 +89,7 @@ class TestHtmlEscape:
         assert _html_escape("<script>") == "&lt;script&gt;"
 
     def test_quotes(self):
-        assert _html_escape("she said \"hi\"") == "she said &quot;hi&quot;"
+        assert _html_escape('she said "hi"') == "she said &quot;hi&quot;"
         assert _html_escape("don't") == "don&#39;t"
 
 
@@ -103,16 +106,28 @@ def _sample_article() -> Article:
         blocks=[
             ArticleBlock(kind=BLOCK_HEADING, level=2, text="Section One"),
             ArticleBlock(kind=BLOCK_PARAGRAPH, text="First paragraph."),
-            ArticleBlock(kind=BLOCK_IMAGE, image=ArticleImage(
-                src="https://pbs.twimg.com/media/abc?format=jpg", alt="a photo", width=800, height=600,
-            )),
+            ArticleBlock(
+                kind=BLOCK_IMAGE,
+                image=ArticleImage(
+                    src="https://pbs.twimg.com/media/abc?format=jpg",
+                    alt="a photo",
+                    width=800,
+                    height=600,
+                ),
+            ),
             ArticleBlock(kind=BLOCK_PARAGRAPH, text="Second paragraph."),
             ArticleBlock(kind=BLOCK_BLOCKQUOTE, text="A quoted thought."),
-            ArticleBlock(kind=BLOCK_LIST, list=ArticleList(items=["one", "two", "three"], ordered=False)),
+            ArticleBlock(
+                kind=BLOCK_LIST, list=ArticleList(items=["one", "two", "three"], ordered=False)
+            ),
             ArticleBlock(kind=BLOCK_HEADING, level=3, text="Subsection"),
-            ArticleBlock(kind=BLOCK_VIDEO_CARD, video_card=ArticleVideoCard(
-                tweet_url="https://x.com/example/status/123", poster_url="https://pbs.twimg.com/media/poster.jpg",
-            )),
+            ArticleBlock(
+                kind=BLOCK_VIDEO_CARD,
+                video_card=ArticleVideoCard(
+                    tweet_url="https://x.com/example/status/123",
+                    poster_url="https://pbs.twimg.com/media/poster.jpg",
+                ),
+            ),
         ],
         body_text="Section One First paragraph. Second paragraph. A quoted thought. one / two / three Subsection",
     )
@@ -139,7 +154,7 @@ class TestRenderHtml:
     def test_image_preserved(self):
         html = render_html(_sample_article())
         assert '<img src="https://pbs.twimg.com/media/abc?format=jpg"' in html
-        assert '<figcaption>a photo</figcaption>' in html
+        assert "<figcaption>a photo</figcaption>" in html
 
     def test_blockquote_preserved(self):
         html = render_html(_sample_article())
@@ -177,12 +192,18 @@ class TestRenderHtml:
         )
         html = render_html(a)
         assert "&lt;script&gt;" in html
-        assert "<script>" not in html.replace("<script>", "KEEPER", 1)  # only the first <script> is OK (style)
+        assert "<script>" not in html.replace(
+            "<script>", "KEEPER", 1
+        )  # only the first <script> is OK (style)
 
     def test_heading_level_clamped(self):
-        a = Article(title="t", url="x", blocks=[
-            ArticleBlock(kind=BLOCK_HEADING, level=99, text="deep"),
-        ])
+        a = Article(
+            title="t",
+            url="x",
+            blocks=[
+                ArticleBlock(kind=BLOCK_HEADING, level=99, text="deep"),
+            ],
+        )
         html = render_html(a)
         assert "<h6>deep</h6>" in html
 
@@ -235,17 +256,25 @@ class TestRenderMarkdown:
 
 class TestArticleDataclass:
     def test_image_count(self):
-        a = Article(title="t", url="x", blocks=[
-            ArticleBlock(kind=BLOCK_IMAGE, image=ArticleImage(src="a")),
-            ArticleBlock(kind=BLOCK_IMAGE, image=ArticleImage(src="b")),
-            ArticleBlock(kind=BLOCK_PARAGRAPH, text="p"),
-        ])
+        a = Article(
+            title="t",
+            url="x",
+            blocks=[
+                ArticleBlock(kind=BLOCK_IMAGE, image=ArticleImage(src="a")),
+                ArticleBlock(kind=BLOCK_IMAGE, image=ArticleImage(src="b")),
+                ArticleBlock(kind=BLOCK_PARAGRAPH, text="p"),
+            ],
+        )
         assert a.image_count == 2
 
     def test_video_count(self):
-        a = Article(title="t", url="x", blocks=[
-            ArticleBlock(kind=BLOCK_VIDEO_CARD, video_card=ArticleVideoCard(tweet_url="t")),
-        ])
+        a = Article(
+            title="t",
+            url="x",
+            blocks=[
+                ArticleBlock(kind=BLOCK_VIDEO_CARD, video_card=ArticleVideoCard(tweet_url="t")),
+            ],
+        )
         assert a.video_count == 1
 
     def test_word_count_cjk_aware(self):
@@ -271,6 +300,7 @@ class TestArticleDataclass:
         js = a.json()
         # dataclasses.asdict → json.dumps round-trip; just verify it parses
         import json as _json
+
         parsed = _json.loads(js)
         assert parsed["title"] == "Test Article"
         assert len(parsed["blocks"]) == len(a.blocks)
@@ -284,6 +314,7 @@ class TestArticleDataclass:
 class TestCookieHelpers:
     def test_cookies_from_dict(self):
         from twscrape.articles import cookies_from_dict
+
         cookies = cookies_from_dict({"auth_token": "x", "ct0": "y"})
         assert len(cookies) == 2
         names = sorted(c.name for c in cookies)
@@ -294,6 +325,7 @@ class TestCookieHelpers:
 
     def test_cookies_from_dict_custom_domain(self):
         from twscrape.articles import cookies_from_dict
+
         cookies = cookies_from_dict({"k": "v"}, domain=".example.com")
         assert cookies[0].domain == ".example.com"
 
@@ -304,17 +336,22 @@ class TestCookieHelpers:
 
 
 class TestArticleIdFromUrl:
-    @pytest.mark.parametrize("url,expected", [
-        ("https://x.com/KKaWSB/article/2073914011524219109?s=20", "2073914011524219109"),
-        ("https://x.com/i/article/2073912103778578432", "2073912103778578432"),
-        ("https://x.com/KKaWSB/status/2073914011524219109?s=20", "2073914011524219109"),
-        ("https://x.com/user/article/12345", "12345"),
-    ])
+    @pytest.mark.parametrize(
+        "url,expected",
+        [
+            ("https://x.com/KKaWSB/article/2073914011524219109?s=20", "2073914011524219109"),
+            ("https://x.com/i/article/2073912103778578432", "2073912103778578432"),
+            ("https://x.com/KKaWSB/status/2073914011524219109?s=20", "2073914011524219109"),
+            ("https://x.com/user/article/12345", "12345"),
+        ],
+    )
     def test_extracts_numeric_id(self, url, expected):
         from twscrape.articles import article_id_from_url
+
         assert article_id_from_url(url) == expected
 
     def test_raises_on_garbage(self):
         from twscrape.articles import article_id_from_url
+
         with pytest.raises(ValueError):
             article_id_from_url("not a url")
