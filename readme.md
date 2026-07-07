@@ -92,10 +92,16 @@ and `ct0`.
 
 ```bash
 # Renders a self-contained HTML file in the current directory
-twitter-x-content_DL article "https://x.com/KKaWSB/status/2073914011524219109?s=20"
+twitter-x-content_DL article "https://x.com/thedankoe/status/2010751592346030461?s=20"
+# Example output (HTML, default):
+#   title:   How to fix your entire life in 1 day
+#   blocks:  162  (images: 3, videos: 0)
+#   words:   5556
+#   wrote 35,801 chars -> ./How to fix your entire life in 1 day_2010751592346030461.html
 
-# Markdown instead
-twitter-x-content_DL article "https://x.com/KKaWSB/article/2073914011524219109" --md
+# Markdown instead (same URL, --md)
+twitter-x-content_DL article "https://x.com/thedankoe/status/2010751592346030461?s=20" --md
+#   wrote 31,558 chars -> ./How to fix your entire life in 1 day_2010751592346030461.md
 
 # Save to a folder, using a named account row
 twitter-x-content_DL --db ./accounts.db article \
@@ -125,13 +131,14 @@ async def main():
     cookies = cookies_from_twscrape_db("./accounts.db", account="my_account")
 
     article: Article = await extract(
-        "https://x.com/KKaWSB/status/2073914011524219109?s=20",
+        "https://x.com/thedankoe/status/2010751592346030461?s=20",
         cookies,
     )
 
-    print(article.title)           # "普通人如何成为一名量化交易员：一条被讲透的路径"
-    print(article.author.username)  # "KKaWSB"
-    print(article.image_count)     # 1
+    print(article.title)        # "How to fix your entire life in 1 day"
+    print(article.word_count)   # 5556
+    print(article.image_count)  # 3
+    print(article.video_count)  # 0
 
     Path("./out.html").write_text(render_html(article))
     Path("./out.md").write_text(render_markdown(article))
